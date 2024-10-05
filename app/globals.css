@@ -2,26 +2,43 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
 body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  background: #09090b;
+  color: white
+}
+
+*:focus {
+  outline: none;
+}
+
+::selection {
+  color: #09090b;
+  background: #00FF41;
 }
 
 @layer utilities {
   .text-balance {
     text-wrap: balance;
+  }
+}
+
+/* Stile per la scrollbar */
+::-webkit-scrollbar {
+  width: 8px; /* Larghezza della scrollbar */
+}
+
+::-webkit-scrollbar-track {
+  background: #09090b; /* Colore dello sfondo della scrollbar */
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: #ffffff; /* Colore del "thumb" (maniglia della scrollbar) */
+  border-radius: 10px; /* Arrotondamento del thumb */
+  border: 3px solid; /* Bordo attorno al thumb, in tinta con il background */
+}
+
+@layer base {
+  :root {
+    --radius: 0.5rem
   }
 }
