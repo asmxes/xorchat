@@ -24,7 +24,7 @@ body {
 
 /* Stile per la scrollbar */
 ::-webkit-scrollbar {
-  width: 8px; /* Larghezza della scrollbar */
+  width: 4px; /* Larghezza della scrollbar */
 }
 
 ::-webkit-scrollbar-track {
@@ -34,7 +34,7 @@ body {
 ::-webkit-scrollbar-thumb {
   background-color: #ffffff; /* Colore del "thumb" (maniglia della scrollbar) */
   border-radius: 10px; /* Arrotondamento del thumb */
-  border: 3px solid; /* Bordo attorno al thumb, in tinta con il background */
+  border: 1px solid; /* Bordo attorno al thumb, in tinta con il background */
 }
 
 @layer base {

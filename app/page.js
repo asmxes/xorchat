@@ -31,7 +31,7 @@ export default function Home() {
 
   const handleSendMessage = () => {
     if (message.trim()) {
-      setMessages([...messages, { username: "username", text: message }]);
+      setMessages([...messages, { username: "asm", text: message }]);
       setMessage(""); // Pulisce l'input dopo l'invio
     }
   };
@@ -54,7 +54,7 @@ export default function Home() {
     {/* Sezione scrollabile per i messaggi */}
     <ContextMenu>
       <ContextMenuTrigger >
-        <ScrollArea className="w-full h-[40rem] pr-2" ref={scrollAreaRef}>
+        <ScrollArea className="w-full h-[40rem] pr-4" ref={scrollAreaRef}>
           {messages.map((msg, index) => (
             <div key={index} className="flex space-x-2">
               <div className="flex">
@@ -70,7 +70,7 @@ export default function Home() {
                 </TooltipProvider>
                 <div>:</div>
               </div>
-              <div className="text-neutral-500">{msg.text}</div>
+              <div className="text-neutral-400">{msg.text}</div>
             </div>
           ))}
         </ScrollArea>
@@ -84,7 +84,7 @@ export default function Home() {
     {/* Input e pulsante per inviare i messaggi */}
     <div className="flex w-full mt-4 space-x-2">
       {/* <Input type="text" value={message} onChange={(e) => setMessage(e.target.value)} placeholder="Scrivi un messaggio..." /> */}
-      <div className="-ml-4 mt-1 text-lg text-[#00FF41]">&gt;</div>
+      <div className="-ml-[5.5rem] mt-2 text-[#00FF41] w-fit h-fit text-nowrap">asm@A9B0-00B0:</div>
       <Textarea value={message}
       onKeyDown={(e) => {
         if (e.key === "Enter") {
