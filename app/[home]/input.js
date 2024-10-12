@@ -54,6 +54,7 @@ export default function Input({ messages, setMessages }) {
     if (e.key === "Enter") {
       e.preventDefault();
       handleSendMessage();
+      setShowCommands(false);
     } else if (e.key === "Tab" && showCommands && filteredCommands.length > 0) {
       e.preventDefault();
       handleCommandSelect(filteredCommands[0]);
@@ -65,25 +66,18 @@ export default function Input({ messages, setMessages }) {
     "animate-blurOut animate-zoomOut",
     "animate-blurIn animate-zoomIn",
     "",
-    "invisible",
+    "invisible pointer-events-none",
   ];
 
   useEffect(() => {
     if (showCommands) {
-      console.log("setting animation state to enter");
       setAnimationState(1); // Trigger "enter" animation
       setTimeout(() => {
-        console.log("setting animation state to static");
-
         setAnimationState(2); // Stop animation after hiding commands
       }, 200);
     } else if (!showCommands && animationState === 2) {
-      console.log("setting animation state to exit");
-
       setAnimationState(0); // Trigger "exit" animation
       setTimeout(() => {
-        console.log("setting animation state to invisible");
-
         setAnimationState(3); // Stop animation after hiding commands
       }, 200);
     }
@@ -92,9 +86,10 @@ export default function Input({ messages, setMessages }) {
   function CommandList() {
     return (
       <div
-        className={`absolute -mt-36 ml-2 z-50 min-h-36 w-full
-        flex flex-col justify-end bg-transparent
-        `}
+        className={`absolute -mt-[8.5rem] ml-1 z-50 h-36 w-full
+          flex flex-col justify-end bg-transparent
+          ${filteredCommands.length === 0 ? "pointer-events-none" : animationState == 3 ? "pointer-events-none" : ""}
+          `}
       >
         <div
           className={`w-full backdrop-blur-lg ${animationSpec[animationState]}`}
@@ -102,9 +97,9 @@ export default function Input({ messages, setMessages }) {
           {filteredCommands.map((cmd) => (
             <div
               key={cmd}
-              className="cursor-pointer p-1 text-gray-400
-            transition-color ease-out duration-200
-            hover:text-bg hover:bg-primary"
+              className="cursor-pointer p-1.5 text-gray-400
+              transition-color ease-out duration-200
+              hover:text-bg hover:bg-primary"
               onClick={() => handleCommandSelect(cmd)}
             >
               /{cmd}
@@ -118,7 +113,7 @@ export default function Input({ messages, setMessages }) {
   return (
     <div className="flex flex-grow mt-4">
       <div className="flex mt-2 text-primary w-fit h-fit text-nowrap">
-        <div className="text-white">{username}</div>
+        <div>{username}</div>
         <div>@</div>
         <div>{room}</div>
         <div>:</div>

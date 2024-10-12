@@ -33,7 +33,7 @@ export default function Content({ messages, setMessages }) {
     <div className="h-2/5 resize-y overflow-auto">
       <ContextMenu>
         <ContextMenuTrigger>
-          <ScrollArea className="pr-2 pb-2 h-full overflow-auto">
+          <ScrollArea className="pr-2 pb-2 h-full">
             {messages.map((msg, index) => (
               <div key={index} className="flex space-x-2">
                 <div className="flex">
