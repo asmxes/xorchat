@@ -3,42 +3,42 @@
 @tailwind utilities;
 
 body {
-  background: #09090b;
-  color: white
+    background: #080f11;
+    color: white;
 }
 
 *:focus {
-  outline: none;
+    outline: none;
 }
 
 ::selection {
-  color: #09090b;
-  background: #00FF41;
+    color: #080f11;
+    background: #48d597;
 }
 
 @layer utilities {
-  .text-balance {
-    text-wrap: balance;
-  }
+    .text-balance {
+        text-wrap: balance;
+    }
 }
 
 /* Stile per la scrollbar */
 ::-webkit-scrollbar {
-  width: 4px; /* Larghezza della scrollbar */
+    width: 4px; /* Larghezza della scrollbar */
 }
 
 ::-webkit-scrollbar-track {
-  background: #09090b; /* Colore dello sfondo della scrollbar */
+    background: #080f11; /* Colore dello sfondo della scrollbar */
 }
 
 ::-webkit-scrollbar-thumb {
-  background-color: #ffffff; /* Colore del "thumb" (maniglia della scrollbar) */
-  border-radius: 10px; /* Arrotondamento del thumb */
-  border: 1px solid; /* Bordo attorno al thumb, in tinta con il background */
+    background-color: #ffffff; /* Colore del "thumb" (maniglia della scrollbar) */
+    border-radius: 10px; /* Arrotondamento del thumb */
+    border: 1px solid; /* Bordo attorno al thumb, in tinta con il background */
 }
 
 @layer base {
-  :root {
-    --radius: 0.5rem
-  }
+    :root {
+        --radius: 0.5rem;
+    }
 }
