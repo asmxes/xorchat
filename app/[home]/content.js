@@ -35,12 +35,14 @@ export default function Content({ messages, setMessages }) {
         <ContextMenuTrigger>
           <ScrollArea className="pr-2 pb-2 h-full">
             {messages.map((msg, index) => (
-              <div key={index} className="flex space-x-2">
+              <div key={index} className="flex space-x-1">
                 <div className="flex">
                   <TooltipProvider>
                     <Tooltip>
                       <TooltipTrigger asChild>
-                        <div className="h-fit underline underline-offset-4">
+                        <div
+                          className={`h-fit underline underline-offset-2 ${msg.username === "system" ? "text-red-900" : ""}`}
+                        >
                           @{msg.username}
                         </div>
                       </TooltipTrigger>
@@ -49,9 +51,17 @@ export default function Content({ messages, setMessages }) {
                       </TooltipContent>
                     </Tooltip>
                   </TooltipProvider>
-                  <div>:</div>
+                  <div
+                    className={`${msg.username === "system" ? "text-red-900" : ""}`}
+                  >
+                    :
+                  </div>
                 </div>
-                <div className="text-neutral-400">{msg.text}</div>
+                <div
+                  className={`${msg.username === "system" ? "text-neutral-600" : "text-neutral-400"}`}
+                >
+                  {msg.text}
+                </div>
               </div>
             ))}
             {/* Dummy div at the bottom to scroll into view */}

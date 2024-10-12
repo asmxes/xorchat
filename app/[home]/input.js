@@ -3,7 +3,7 @@ import { useState, useEffect, useRef } from "react";
 
 import { Textarea } from "@/components/ui/textarea";
 
-const commands = ["username", "passkey", "clear", "room", "help"];
+const commands = ["username", "passkey", "clear", "room"];
 
 export default function Input({ messages, setMessages }) {
   const [username, setUsername] = useState("guest");
@@ -16,10 +16,71 @@ export default function Input({ messages, setMessages }) {
 
   const inputRef = useRef(null);
 
+  const handleCommand = (commandMessage) => {
+    const [command, ...contentArr] = commandMessage.split(" "); // Split by space
+    const content = contentArr.join(" ").trim(); // Get the content after the command name
+
+    // Check if content is missing
+
+    const check_conent = () => {
+      if (!content) {
+        setMessages([
+          ...messages,
+          {
+            username: "system",
+            text: `The command '${command}' requires an argument.`,
+          },
+        ]);
+        return false;
+      }
+      return true;
+    };
+
+    // Handle different commands
+    switch (command) {
+      case "/passkey":
+        if (!check_conent()) return;
+        setPasskey(content); // Set new passkey
+        setMessages([
+          ...messages,
+          { username: "system", text: `Passkey has been changed` },
+        ]);
+        break;
+      case "/username":
+        if (!check_conent()) return;
+        setUsername(content); // Set new username
+        setMessages([
+          ...messages,
+          { username: "system", text: `Username changed to ${content}` },
+        ]);
+        break;
+      case "/room":
+        if (!check_conent()) return;
+        setRoom(content); // Change room
+        setMessages([
+          ...messages,
+          { username: "system", text: `Room changed to ${content}` },
+        ]);
+        break;
+      case "/clear":
+        setMessages([]); // Clear chat
+        break;
+      default:
+        setMessages([
+          ...messages,
+          {
+            username: "system",
+            text: `Unknown command '${command}'`,
+          },
+        ]);
+        break;
+    }
+  };
+
   const handleSendMessage = () => {
     if (message.trim()) {
       if (message.startsWith("/")) {
-        //handlecommand
+        handleCommand(message);
         setMessage(""); // Clear input after sending
       } else {
         setMessages([...messages, { username: username, text: message }]);
