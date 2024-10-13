@@ -1,11 +1,11 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
 import { getCurrentTimeUTC } from "./utility";
-import * as WS from "./client";
-
+import WebSocketClient from "./client"; // Import WebSocket functions and types
+import { ServerCMD, ClientCMD, ClientPayload } from "../types"; // Import the types for client commands
 import { Textarea } from "@/components/ui/textarea";
 
-const commands = ["username", "passkey", "clear", "room"];
+const commands = ["username", "key", "clear", "join"];
 
 export default function Input({ messages, setMessages }) {
   const [username, setUsername] = useState("guest");
@@ -13,23 +13,63 @@ export default function Input({ messages, setMessages }) {
 
   const [room, setRoom] = useState("local");
 
-  const [passkey, setPasskey] = useState();
+  const [key, setKey] = useState();
   const [showCommands, setShowCommands] = useState(false);
   const [animationState, setAnimationState] = useState(3);
   const [filteredCommands, setFilteredCommands] = useState(commands);
 
   const inputRef = useRef(null);
 
+  const [client, setClient] = useState(null);
+
+  const serverCallback = (payload) => {
+    const current_time = getCurrentTimeUTC();
+
+    switch (payload.cmd) {
+      case ServerCMD.INFO:
+        setMessages((prev) => [
+          ...prev,
+          {
+            username: "system",
+            text: payload.data.message,
+            time: current_time,
+          },
+        ]);
+        break;
+      case ServerCMD.MESSAGE:
+        setMessages((prev) => [
+          ...prev,
+          {
+            username: payload.data.username,
+            text: payload.data.message,
+            time: current_time,
+          },
+        ]);
+        break;
+      case ServerCMD.ERROR:
+        setMessages((prev) => [
+          ...prev,
+          {
+            username: "system",
+            text: `Error: ${payload.data.message}`,
+            time: current_time,
+          },
+        ]);
+        break;
+      default:
+        console.log("Unknown payload command", payload.cmd);
+    }
+  };
+
   const handleCommand = (commandMessage) => {
     const [command, ...contentArr] = commandMessage.split(" "); // Split by space
     const content = contentArr.join(" ").trim(); // Get the content after the command name
     const current_time = getCurrentTimeUTC();
-    // Check if content is missing
 
-    const check_conent = () => {
+    const check_content = () => {
       if (!content) {
-        setMessages([
-          ...messages,
+        setMessages((prev) => [
+          ...prev,
           {
             username: "system",
             text: `The command '${command}' requires an argument.`,
@@ -43,23 +83,27 @@ export default function Input({ messages, setMessages }) {
 
     // Handle different commands
     switch (command) {
-      case "/passkey":
-        if (!check_conent()) return;
-        setPasskey(content); // Set new passkey
-        setMessages([
-          ...messages,
+      case "/key":
+        if (!check_content()) return;
+        setKey(content); // Set new key
+        setMessages((prev) => [
+          ...prev,
           {
             username: "system",
-            text: `Passkey has been changed`,
+            text: `Key has been changed`,
             time: current_time,
           },
         ]);
         break;
       case "/username":
-        if (!check_conent()) return;
+        if (!check_content()) return;
         setUsername(content); // Set new username
-        setMessages([
-          ...messages,
+        client.sendPayload({
+          cmd: ClientCMD.CHANGE_USERNAME,
+          data: { username: content },
+        }); // Send username change payload
+        setMessages((prev) => [
+          ...prev,
           {
             username: "system",
             text: `Username changed to ${content}`,
@@ -67,11 +111,15 @@ export default function Input({ messages, setMessages }) {
           },
         ]);
         break;
-      case "/room":
-        if (!check_conent()) return;
-        setRoom(content); // Change room
-        setMessages([
-          ...messages,
+      case "/join":
+        if (!check_content()) return;
+        setRoom(content); // Set new room
+        client.sendPayload({
+          cmd: ClientCMD.JOIN_ROOM,
+          data: { room: content },
+        }); // Send join room payload
+        setMessages((prev) => [
+          ...prev,
           {
             username: "system",
             text: `Room changed to ${content}`,
@@ -83,8 +131,8 @@ export default function Input({ messages, setMessages }) {
         setMessages([]); // Clear chat
         break;
       default:
-        setMessages([
-          ...messages,
+        setMessages((prev) => [
+          ...prev,
           {
             username: "system",
             text: `Unknown command '${command}'`,
@@ -102,10 +150,14 @@ export default function Input({ messages, setMessages }) {
         setMessage(""); // Clear input after sending
       } else {
         const current_time = getCurrentTimeUTC();
-        setMessages([
-          ...messages,
-          { username: username, text: message, time: current_time },
-        ]);
+        client.sendPayload({
+          cmd: ClientCMD.MESSAGE,
+          data: { message, room, username },
+        }); // Send message payload to server
+        // setMessages((prev) => [
+        //   ...prev,
+        //   { username: username, text: message, time: current_time },
+        // ]);
         setMessage(""); // Clear input after sending
       }
     }
@@ -166,12 +218,22 @@ export default function Input({ messages, setMessages }) {
     }
   }, [showCommands]);
 
-  const serverCallbac = () => {};
-
   useEffect(() => {
-    WS.set_callback(serverCallbac);
-    console.log("WS Status is: ", WS.is_connected);
+    const wsClient = new WebSocketClient(process.env.NEXT_PUBLIC_WS_URL ?? "");
+    wsClient.setCallback(serverCallback);
+    console.log("System status is: ", wsClient.isConnectedStatus);
+
+    setClient(wsClient);
+
   }, []);
+
+  // useEffect(()=>{
+  //   client.setCallback(serverCallback);
+
+  //   return () => {
+  //     client.closeConnection();
+  //   };
+  // }, [client])
 
   // const connectWebSocket = (room) => {
   //   ws.current = new WebSocket(`ws://localhost:3001`); // Connect to WebSocket server

@@ -10,7 +10,7 @@ import {
 
 const rooms: { [key: string]: WebSocketWithRoom[] } = {};
 
-const server = Bun.serve({
+Bun.serve({
   port: 3001,
   fetch(req, server) {
     if (server.upgrade(req)) {
@@ -35,11 +35,6 @@ const server = Bun.serve({
         } else {
           sendError(ws, "An unknown error occurred");
         }
-        return;
-      }
-
-      if (!parsed_message.cmd) {
-        sendError(ws, "Invalid command received");
         return;
       }
 
@@ -134,7 +129,7 @@ const server = Bun.serve({
   },
 });
 
-console.log("WebSocket server running on ws://localhost:3001");
+console.log("WebSocket server running on", process.env.NEXT_PUBLIC_WS_URL);
 
 function broadcastMessage(room: string, username: string, message: string) {
   const clients = rooms[room] || [];
@@ -149,6 +144,8 @@ function broadcastMessage(room: string, username: string, message: string) {
 
 function broadcastInfo(room: string, message: string) {
   const clients = rooms[room] || [];
+  console.log("Broadcasting: ", message);
+  console.log("to : ", clients.length);
 
   const data: ServerData = { username: undefined, message };
   const payload: ServerPayload = { cmd: ServerCMD.INFO, data };
