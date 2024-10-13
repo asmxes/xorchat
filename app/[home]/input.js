@@ -1,5 +1,7 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
+import { getCurrentTimeUTC } from "./utility";
+import * as WS from "./client";
 
 import { Textarea } from "@/components/ui/textarea";
 
@@ -8,7 +10,9 @@ const commands = ["username", "passkey", "clear", "room"];
 export default function Input({ messages, setMessages }) {
   const [username, setUsername] = useState("guest");
   const [message, setMessage] = useState("");
+
   const [room, setRoom] = useState("local");
+
   const [passkey, setPasskey] = useState();
   const [showCommands, setShowCommands] = useState(false);
   const [animationState, setAnimationState] = useState(3);
@@ -19,7 +23,7 @@ export default function Input({ messages, setMessages }) {
   const handleCommand = (commandMessage) => {
     const [command, ...contentArr] = commandMessage.split(" "); // Split by space
     const content = contentArr.join(" ").trim(); // Get the content after the command name
-
+    const current_time = getCurrentTimeUTC();
     // Check if content is missing
 
     const check_conent = () => {
@@ -29,6 +33,7 @@ export default function Input({ messages, setMessages }) {
           {
             username: "system",
             text: `The command '${command}' requires an argument.`,
+            time: current_time,
           },
         ]);
         return false;
@@ -43,7 +48,11 @@ export default function Input({ messages, setMessages }) {
         setPasskey(content); // Set new passkey
         setMessages([
           ...messages,
-          { username: "system", text: `Passkey has been changed` },
+          {
+            username: "system",
+            text: `Passkey has been changed`,
+            time: current_time,
+          },
         ]);
         break;
       case "/username":
@@ -51,7 +60,11 @@ export default function Input({ messages, setMessages }) {
         setUsername(content); // Set new username
         setMessages([
           ...messages,
-          { username: "system", text: `Username changed to ${content}` },
+          {
+            username: "system",
+            text: `Username changed to ${content}`,
+            time: current_time,
+          },
         ]);
         break;
       case "/room":
@@ -59,7 +72,11 @@ export default function Input({ messages, setMessages }) {
         setRoom(content); // Change room
         setMessages([
           ...messages,
-          { username: "system", text: `Room changed to ${content}` },
+          {
+            username: "system",
+            text: `Room changed to ${content}`,
+            time: current_time,
+          },
         ]);
         break;
       case "/clear":
@@ -71,6 +88,7 @@ export default function Input({ messages, setMessages }) {
           {
             username: "system",
             text: `Unknown command '${command}'`,
+            time: current_time,
           },
         ]);
         break;
@@ -83,7 +101,11 @@ export default function Input({ messages, setMessages }) {
         handleCommand(message);
         setMessage(""); // Clear input after sending
       } else {
-        setMessages([...messages, { username: username, text: message }]);
+        const current_time = getCurrentTimeUTC();
+        setMessages([
+          ...messages,
+          { username: username, text: message, time: current_time },
+        ]);
         setMessage(""); // Clear input after sending
       }
     }
@@ -143,6 +165,31 @@ export default function Input({ messages, setMessages }) {
       }, 200);
     }
   }, [showCommands]);
+
+  const serverCallbac = () => {};
+
+  useEffect(() => {
+    WS.set_callback(serverCallbac);
+    console.log("WS Status is: ", WS.is_connected);
+  }, []);
+
+  // const connectWebSocket = (room) => {
+  //   ws.current = new WebSocket(`ws://localhost:3001`); // Connect to WebSocket server
+
+  //   ws.current.onopen = () => {
+  //     console.log(`Connected to WebSocket for room: ${room}`);
+  //     // Optionally, send a message to join the room
+  //     ws.current.send(JSON.stringify({ type: "join", room, username }));
+  //   };
+
+  //   ws.current.onclose = () => {
+  //     console.log("WebSocket connection closed");
+  //   };
+
+  //   ws.current.onerror = (error) => {
+  //     console.error("WebSocket error: ", error);
+  //   };
+  // };
 
   function CommandList() {
     return (
