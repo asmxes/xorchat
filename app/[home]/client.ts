@@ -59,7 +59,7 @@ class WebSocketClient {
         cmd: ServerCMD.ERROR,
         data: { message: JSON.stringify(error) },
       };
-      if (this.callback) this.callback(errorPayload);
+      // if (this.callback) this.callback(errorPayload);
     };
 
     // Handle WebSocket close event
