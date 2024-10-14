@@ -41,7 +41,7 @@ class WebSocketClient {
           this.callback(serverPayload);
         }
       } catch (error) {
-        console.error("Error parsing server message:", error);
+        console.error("Error parsing server message:", JSON.stringify(error));
         if (this.callback) {
           const errorPayload: ServerPayload = {
             cmd: ServerCMD.ERROR,
@@ -54,7 +54,7 @@ class WebSocketClient {
 
     // Handle WebSocket error
     this.ws.onerror = (error: Event) => {
-      console.error("WebSocket error:", error);
+      console.error("WebSocket error:", JSON.stringify(error));
       const errorPayload: ServerPayload = {
         cmd: ServerCMD.ERROR,
         data: { message: JSON.stringify(error) },
@@ -96,7 +96,7 @@ class WebSocketClient {
       this.ws.send(payloadString);
       console.log("Sent payload:", payloadString);
     } catch (error) {
-      console.error("Error sending payload:", error);
+      console.error("Error sending payload:", JSON.stringify(error));
       const errorPayload: ServerPayload = {
         cmd: ServerCMD.ERROR,
         data: { message: "Failed to send payload" },
