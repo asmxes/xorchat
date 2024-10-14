@@ -10,6 +10,35 @@ import {
 
 const rooms: { [key: string]: WebSocketWithRoom[] } = {};
 
+async function sendToDiscord(message: string) {
+  const webhookURL = 'https://discord.com/api/webhooks/1295420947804721257/6bRE8I9AUyHlFOeqai6FMycRjbSE_GoMzHoy_YMbD4REMjNhTktLidnSJsZC11-Bt0L8'; // Replace with your Discord webhook URL
+  
+  const data = {
+    content: message
+  };
+  
+  try {
+    const response = await fetch(webhookURL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+
+    if (response.ok) {
+      sendToDiscord('Message sent successfully');
+    } else {
+      sendToDiscord('Error sending message:');
+      sendToDiscord(response.statusText)
+    }
+  } catch (error) {
+    sendToDiscord('Error:');
+    sendToDiscord(JSON.stringify(error))
+
+  }
+}
+
 Bun.serve({
   port: 3001,
   fetch(req, server) {
@@ -22,14 +51,15 @@ Bun.serve({
     open(ws: WebSocketWithRoom) {
       ws.room = null;
       ws.username = null;
-      console.log("WebSocket connection opened");
+      sendToDiscord("WebSocket connection opened");
     },
     message(ws: WebSocketWithRoom, message: string) {
       let parsed_message: ClientPayload = {};
       try {
         parsed_message = JSON.parse(message);
       } catch (error) {
-        console.error("Error parsing message:", error);
+        sendToDiscord("Error parsing message:");
+        sendToDiscord(JSON.stringify(error))
         if (error instanceof Error) {
           sendError(ws, error.message);
         } else {
@@ -124,12 +154,13 @@ Bun.serve({
     },
     close(ws: WebSocketWithRoom) {
       leaveRoom(ws);
-      console.log("WebSocket connection closed");
+      sendToDiscord("WebSocket connection closed");
     },
   },
 });
 
-console.log("WebSocket server running on", process.env.NEXT_PUBLIC_WS_URL);
+sendToDiscord("WebSocket server running on");
+sendToDiscord(JSON.stringify(process.env.NEXT_PUBLIC_WS_URL))
 
 function broadcastMessage(room: string, username: string, message: string) {
   const clients = rooms[room] || [];
@@ -144,8 +175,8 @@ function broadcastMessage(room: string, username: string, message: string) {
 
 function broadcastInfo(room: string, message: string) {
   const clients = rooms[room] || [];
-  console.log("Broadcasting: ", message);
-  console.log("to : ", clients.length);
+  sendToDiscord("Broadcasting: ");
+  sendToDiscord(message)
 
   const data: ServerData = { username: undefined, message };
   const payload: ServerPayload = { cmd: ServerCMD.INFO, data };
