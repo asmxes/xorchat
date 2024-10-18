@@ -227,36 +227,10 @@ export default function Input({ messages, setMessages }) {
     setClient(wsClient);
   }, []);
 
-  // useEffect(()=>{
-  //   client.setCallback(serverCallback);
-
-  //   return () => {
-  //     client.closeConnection();
-  //   };
-  // }, [client])
-
-  // const connectWebSocket = (room) => {
-  //   ws.current = new WebSocket(`ws://localhost:3001`); // Connect to WebSocket server
-
-  //   ws.current.onopen = () => {
-  //     console.log(`Connected to WebSocket for room: ${room}`);
-  //     // Optionally, send a message to join the room
-  //     ws.current.send(JSON.stringify({ type: "join", room, username }));
-  //   };
-
-  //   ws.current.onclose = () => {
-  //     console.log("WebSocket connection closed");
-  //   };
-
-  //   ws.current.onerror = (error) => {
-  //     console.error("WebSocket error: ", error);
-  //   };
-  // };
-
   function CommandList() {
     return (
       <div
-        className={`absolute -mt-[8.5rem] ml-1 z-50 h-36 w-full
+        className={`absolute -mt-[8.5rem] -ml-1 sm:ml-1 z-50 h-36 w-full
           flex flex-col justify-end bg-transparent
           ${filteredCommands.length === 0 ? "pointer-events-none" : animationState == 3 ? "pointer-events-none" : ""}
           `}
@@ -281,8 +255,8 @@ export default function Input({ messages, setMessages }) {
   }
 
   return (
-    <div className="flex flex-grow mt-4">
-      <div className="flex mt-2 text-primary w-fit h-fit text-nowrap">
+    <div className="w-full flex flex-col sm:flex-row flex-grow mt-4">
+      <div className="flex mt-0 sm:mt-3 text-primary w-fit h-fit text-nowrap">
         <div>{username}</div>
         <div>@</div>
         <div>{room}</div>
@@ -290,8 +264,8 @@ export default function Input({ messages, setMessages }) {
       </div>
       <div className="relative w-full">
         {<CommandList />}
-        <Textarea
-          className="resize-none min-h-full w-full"
+        <input
+          className="bg-transparent placeholder:text-neutral-700 text-base resize-none min-w-full py-2 px-0 sm:px-2"
           value={message}
           onKeyDown={handleKeyDown}
           onChange={handleInputChange}
