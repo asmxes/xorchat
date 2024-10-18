@@ -1,5 +1,5 @@
 // Import the WebSocket from Bun (or Node.js WebSocket)
-const ws = new WebSocket("ws://localhost:3001");
+const ws = new WebSocket("ws://xorchat.vercel.app:3001");
 
 // Define a delay function to control message flow
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));

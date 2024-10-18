@@ -4,6 +4,7 @@ import { getCurrentTimeUTC } from "./utility";
 import WebSocketClient from "./client"; // Import WebSocket functions and types
 import { ServerCMD, ClientCMD, ClientPayload } from "../types"; // Import the types for client commands
 import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
 
 const commands = ["username", "key", "clear", "join"];
 
@@ -224,7 +225,6 @@ export default function Input({ messages, setMessages }) {
     console.log("System status is: ", wsClient.isConnectedStatus);
 
     setClient(wsClient);
-
   }, []);
 
   // useEffect(()=>{
