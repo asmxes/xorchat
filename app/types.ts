@@ -21,12 +21,14 @@ export interface ClientPayload {
 export interface ServerData {
   username?: string;
   message?: string;
+  members?: string[];
 }
 
 export enum ServerCMD {
   INFO,
   ERROR,
   MESSAGE,
+  MEMBERS,
 }
 
 export interface ServerPayload {

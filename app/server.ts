@@ -88,6 +88,7 @@ Bun.serve({
 
           rooms[ws.room].push(ws);
           broadcastInfo(ws.room, `User ${ws.username} has joined the room`);
+          broadCastMembersUpdate(ws.room);
           break;
         }
 
@@ -96,8 +97,9 @@ Bun.serve({
             sendError(ws, "You are not in a room");
             return;
           }
-
+          let temp = ws.room;
           leaveRoom(ws);
+          broadCastMembersUpdate(temp);
           break;
         }
 
@@ -130,6 +132,22 @@ Bun.serve({
 });
 
 console.log("WebSocket server running on", process.env.NEXT_PUBLIC_WS_URL);
+
+function broadCastMembersUpdate(room: string) {
+  const clients = rooms[room] || [];
+  let members: string[] = [];
+  for (let i = 0; i < clients.length; i++) {
+    members.push(clients[i].username ?? "");
+  }
+  const data: ServerData = { members };
+  const payload: ServerPayload = { cmd: ServerCMD.MEMBERS, data };
+
+  console.log(payload);
+
+  clients.forEach((client) => {
+    client.send(JSON.stringify(payload));
+  });
+}
 
 function broadcastMessage(room: string, username: string, message: string) {
   const clients = rooms[room] || [];

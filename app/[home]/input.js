@@ -3,12 +3,10 @@ import { useState, useEffect, useRef } from "react";
 import { getCurrentTimeUTC } from "./utility";
 import WebSocketClient from "./client"; // Import WebSocket functions and types
 import { ServerCMD, ClientCMD, ClientPayload } from "../types"; // Import the types for client commands
-import { Textarea } from "@/components/ui/textarea";
-import { Button } from "@/components/ui/button";
 
-const commands = ["username", "key", "clear", "join"];
+const commands = ["username", "key", "clear", "join", "leave"];
 
-export default function Input({ messages, setMessages }) {
+export default function Input({ setMessages, setMembers }) {
   const [username, setUsername] = useState("guest");
   const [message, setMessage] = useState("");
 
@@ -57,6 +55,12 @@ export default function Input({ messages, setMessages }) {
           },
         ]);
         break;
+
+      case ServerCMD.MEMBERS: {
+        setMembers(payload.data.members);
+        console.log(payload.data.members);
+        break;
+      }
       default:
         console.log("Unknown payload command", payload.cmd);
     }
@@ -124,6 +128,22 @@ export default function Input({ messages, setMessages }) {
           {
             username: "system",
             text: `Room changed to ${content}`,
+            time: current_time,
+          },
+        ]);
+        break;
+      case "/leave":
+        client.sendPayload({
+          cmd: ClientCMD.LEAVE_ROOM,
+          data: { room: room },
+        }); // Send join room payload
+        setRoom("local"); // Set new room
+        setMessage([]);
+        setMessages((prev) => [
+          ...prev,
+          {
+            username: "system",
+            text: `Left the room ${content}`,
             time: current_time,
           },
         ]);

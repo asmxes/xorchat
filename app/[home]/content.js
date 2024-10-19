@@ -20,7 +20,7 @@ function Message({ key, msg }) {
   return (
     <div
       key={key}
-      className={`flex ${system_message ? "justify-center py-2" : "justify-start"} space-x-1 mt-0.5`}
+      className={`flex ${system_message ? "justify-center py-1" : "justify-start"} space-x-1 mt-0.5`}
     >
       {!system_message && (
         <div className="flex">
@@ -49,12 +49,8 @@ function Message({ key, msg }) {
   );
 }
 
-export default function Content({ messages, setMessages }) {
+export default function Content({ messages }) {
   const bottomRef = useRef(null); // Reference for the bottom of the message list
-
-  const handleClearChat = () => {
-    setMessages([]); // Clear all messages
-  };
 
   useEffect(() => {
     if (bottomRef.current) {
@@ -64,7 +60,7 @@ export default function Content({ messages, setMessages }) {
   }, [messages]);
 
   return (
-    <div className="flex flex-col justify-end h-full sm:h-96 overflow-auto resize-y">
+    <div className=" flex flex-col justify-end h-full sm:h-96 overflow-auto min-h-40 resize-y">
       <div className="overflow-auto">
         {messages.length === 0 ? (
           <div className=" text-neutral-400 text-xs flex flex-col space-y-4">
@@ -105,12 +101,5 @@ export default function Content({ messages, setMessages }) {
         <div ref={bottomRef} />
       </div>
     </div>
-    // <ContextMenu>
-    //   <ContextMenuTrigger>
-    //   </ContextMenuTrigger>
-    //   <ContextMenuContent className="w-fit">
-    //     <ContextMenuItem onClick={handleClearChat}>Clear chat</ContextMenuItem>
-    //   </ContextMenuContent>
-    // </ContextMenu>
   );
 }
