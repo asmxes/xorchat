@@ -6,7 +6,7 @@ export default function Rooms({
   selectedRoom,
   setSelectedRoom,
 }) {
-  if (!chatInfos.length)
+  if (chatInfos.length === 1)
     return <div className="hidden lg:w-1/6 lg:flex xl:w-36 px-4 " />;
 
   return (
@@ -18,7 +18,7 @@ export default function Rooms({
             className={`${selectedRoom == chatInfo.room ? "text-white" : "text-neutral-400"}`}
             key={index}
           >
-            {chatInfo.room}
+            {chatInfo.room !== "local" ? chatInfo.room : null}
           </div>
         ))}
       </div>
