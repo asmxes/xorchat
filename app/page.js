@@ -6,6 +6,8 @@ import Input from "./[home]/input";
 import Members from "./[home]/members";
 import Rooms from "./[home]/rooms";
 
+import { MessageData, ChatInfo } from "./[home]/types";
+
 export default function Home() {
   const [messages, setMessages] = useState([]);
   const [members, setMembers] = useState([]);

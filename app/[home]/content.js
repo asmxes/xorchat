@@ -20,7 +20,8 @@ function Message({ key, msg }) {
   return (
     <div
       key={key}
-      className={`flex ${system_message ? "justify-center py-1" : "justify-start"} space-x-1 mt-0.5`}
+      className={`flex ${system_message ? "justify-center py-1" : "justify-start"} space-x-1 mt-0.5
+        animate-zoomIn animate-blurIn`}
     >
       {!system_message && (
         <div className="flex">

@@ -19,6 +19,7 @@ export interface ClientPayload {
 }
 
 export interface ServerData {
+  room?: string;
   username?: string;
   message?: string;
   members?: string[];

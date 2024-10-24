@@ -1,7 +1,8 @@
 "use client";
 
 export default function Rooms({ chatInfos }) {
-  if (!chatInfos.length) return;
+  if (!chatInfos.length)
+    return <div className="hidden lg:w-1/6 lg:flex xl:w-36 px-4 " />;
 
   return (
     <div className=" hidden lg:w-1/6 lg:flex xl:w-36 px-4 flex-col">
