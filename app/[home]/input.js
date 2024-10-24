@@ -199,7 +199,7 @@ export default function Input({
           cacheMessageInRoom(selectedRoom, {
             time: current_time,
             username: "system",
-            text: `You are not in room ${content}`,
+            text: `You are not in room '${content}'`,
           });
         }
 

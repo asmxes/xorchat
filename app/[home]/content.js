@@ -3,18 +3,48 @@ import { useEffect, useRef } from "react";
 import { XOR } from "./utility";
 
 import {
-  ContextMenu,
-  ContextMenuContent,
-  ContextMenuItem,
-  ContextMenuTrigger,
-} from "@/components/ui/context-menu";
-import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { ScrollArea } from "@/components/ui/scroll-area";
+
+function QA() {
+  return (
+    <div className=" text-neutral-400 text-xs flex flex-col space-y-4">
+      <h1 className="text-neutral-200 font-semibold text-xl">
+        Welcome to xor.chat!
+      </h1>
+      <div className="mt-2">
+        Before you begin,
+        <div className="mt-2">
+          Change your username using{" "}
+          <code className="bg-neutral-900 p-1 rounded">
+            /username &lt;your username&gt;
+          </code>
+        </div>
+      </div>
+      <div className="mt-2">
+        You can then join a room with{" "}
+        <code className="bg-neutral-900 p-1 rounded">
+          /join &lt;room id&gt;
+        </code>
+      </div>
+      <div className="mt-2">
+        You can crypt your messages using{" "}
+        <code className="bg-neutral-900 p-1 rounded">
+          /key &lt;your pass key&gt;
+        </code>
+        <div className="mt-2">
+          Make sure other people already know the passkey, otherwise they will
+          not be able to read your messages!
+        </div>
+        <div className="mt-2">Happy chatting! </div>
+      </div>
+    </div>
+  );
+}
 
 function Message({ key, msg, decryption_key }) {
   let system_message = msg.username === "system";
@@ -51,7 +81,7 @@ function Message({ key, msg, decryption_key }) {
   );
 }
 
-export default function Content({ messages, decryption_key }) {
+export default function Content({ messages, decryption_key, selectedRoom }) {
   const bottomRef = useRef(null); // Reference for the bottom of the message list
 
   useEffect(() => {
@@ -64,6 +94,7 @@ export default function Content({ messages, decryption_key }) {
   return (
     <div className=" flex flex-col justify-end h-full sm:h-96 overflow-auto min-h-40 resize-y">
       <div className="overflow-auto">
+        {selectedRoom === "local" ? <QA /> : null}
         {messages.map((msg, index) => (
           <Message key={index} msg={msg} decryption_key={decryption_key} />
         ))}
