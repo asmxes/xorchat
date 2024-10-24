@@ -26,6 +26,9 @@ export interface ServerData {
 }
 
 export enum ServerCMD {
+  USERNAME_CHANGED,
+  ROOM_JOINED,
+  ROOM_LEFT,
   INFO,
   ERROR,
   MESSAGE,
@@ -38,6 +41,6 @@ export interface ServerPayload {
 }
 
 export interface WebSocketWithRoom extends ServerWebSocket<unknown> {
-  room: string | null;
+  rooms: string[];
   username: string | null;
 }

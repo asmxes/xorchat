@@ -1,18 +1,20 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
-import { getCurrentTimeUTC } from "./utility";
+import { getCurrentTimeUTC, XOR } from "./utility";
 import WebSocketClient from "./client"; // Import WebSocket functions and types
 import { ServerCMD, ClientCMD, ClientPayload } from "../types"; // Import the types for client commands
 
-const commands = ["username", "key", "clear", "join", "leave"];
+const commands = ["username", "key", "clear", "join", "leave", "switch"];
 
-export default function Input({ setMessages, setMembers }) {
+export default function Input({
+  chatInfos,
+  setChatInfos,
+  selectedRoom,
+  setSelectedRoom,
+}) {
   const [username, setUsername] = useState("guest");
   const [message, setMessage] = useState("");
 
-  const [room, setRoom] = useState("local");
-
-  const [key, setKey] = useState();
   const [showCommands, setShowCommands] = useState(false);
   const [animationState, setAnimationState] = useState(3);
   const [filteredCommands, setFilteredCommands] = useState(commands);
@@ -21,46 +23,96 @@ export default function Input({ setMessages, setMembers }) {
 
   const [client, setClient] = useState(null);
 
+  // Create a ref to store the latest value of selectedRoom
+  const selectedRoomRef = useRef(selectedRoom);
+
+  // Update the ref whenever selectedRoom changes
+  useEffect(() => {
+    selectedRoomRef.current = selectedRoom;
+  }, [selectedRoom]);
+
+  const cacheMessageInRoom = (room, message) => {
+    // Use the ref's current value
+    const room_var = room || selectedRoomRef.current;
+    setChatInfos((prevChatInfos) =>
+      prevChatInfos.map((info) =>
+        info.room === room_var
+          ? {
+              ...info,
+              messages: [...info.messages, message], // Add the new message to the room's messages
+            }
+          : info,
+      ),
+    );
+  };
+
   const serverCallback = (payload) => {
     const current_time = getCurrentTimeUTC();
 
     switch (payload.cmd) {
-      case ServerCMD.INFO:
-        setMessages((prev) => [
-          ...prev,
-          {
-            username: "system",
-            text: payload.data.message,
-            time: current_time,
-          },
-        ]);
-        break;
-      case ServerCMD.MESSAGE:
-        setMessages((prev) => [
-          ...prev,
-          {
-            username: payload.data.username,
-            text: payload.data.message,
-            time: current_time,
-          },
-        ]);
-        break;
-      case ServerCMD.ERROR:
-        setMessages((prev) => [
-          ...prev,
-          {
-            username: "system",
-            text: `Error: ${payload.data.message}`,
-            time: current_time,
-          },
-        ]);
+      case ServerCMD.USERNAME_CHANGED:
+        setUsername(payload.data.username);
         break;
 
-      case ServerCMD.MEMBERS: {
-        setMembers(payload.data.members);
+      case ServerCMD.ROOM_JOINED:
+        setSelectedRoom(payload.data.room); // Set new room
+        let newChatInfo = {
+          room: payload.data.room,
+          members: [],
+          messages: [],
+          key: "",
+        };
+
+        setChatInfos((prev) =>
+          prev.includes(payload.data.room) ? prev : [...prev, newChatInfo],
+        );
+        break;
+
+      case ServerCMD.ROOM_LEFT:
+        setChatInfos((prev) =>
+          prev.filter((chatInfo) => chatInfo.room !== payload.data.room),
+        );
+        setSelectedRoom("local"); // Set new room
+        break;
+
+      case ServerCMD.INFO:
+        cacheMessageInRoom(payload.data.room, {
+          username: "system",
+          text: payload.data.message,
+          time: current_time,
+        });
+        break;
+
+      case ServerCMD.MESSAGE:
+        cacheMessageInRoom(payload.data.room, {
+          username: payload.data.username,
+          text: payload.data.message,
+          time: current_time,
+        });
+        break;
+
+      case ServerCMD.ERROR:
+        cacheMessageInRoom(payload.data.room, {
+          username: "system",
+          text: `Error: ${payload.data.message}`,
+          time: current_time,
+        });
+        break;
+
+      case ServerCMD.MEMBERS:
+        setChatInfos((prevChatInfos) =>
+          prevChatInfos.map((info) =>
+            info.room === payload.data.room
+              ? {
+                  ...info,
+                  members: payload.data.members,
+                }
+              : info,
+          ),
+        );
         console.log(payload.data.members);
         break;
-      }
+
       default:
         console.log("Unknown payload command", payload.cmd);
     }
@@ -73,14 +125,23 @@ export default function Input({ setMessages, setMembers }) {
 
     const check_content = () => {
       if (!content) {
-        setMessages((prev) => [
-          ...prev,
-          {
-            username: "system",
-            text: `The command '${command}' requires an argument.`,
-            time: current_time,
-          },
-        ]);
+        setChatInfos((prev) =>
+          prev.map((info) =>
+            info.room === selectedRoom
+              ? {
+                  ...info,
+                  messages: [
+                    ...info.messages,
+                    {
+                      username: "system",
+                      text: `The command '${command}' requires an argument.`,
+                      time: getCurrentTimeUTC(),
+                    },
+                  ],
+                }
+              : info,
+          ),
+        );
         return false;
       }
       return true;
@@ -89,77 +150,85 @@ export default function Input({ setMessages, setMembers }) {
     // Handle different commands
     switch (command) {
       case "/key":
-        if (!check_content()) return;
-        setKey(content); // Set new key
-        setMessages((prev) => [
-          ...prev,
-          {
-            username: "system",
-            text: `Key has been changed`,
-            time: current_time,
-          },
-        ]);
+        setChatInfos((prevChatInfos) =>
+          prevChatInfos.map((info) =>
+            info.room === selectedRoom
+              ? {
+                  ...info,
+                  key: content,
+                }
+              : info,
+          ),
+        );
+
+        cacheMessageInRoom(selectedRoom, {
+          username: "system",
+          text: "Key updated",
+          time: current_time,
+        });
+
         break;
       case "/username":
         if (!check_content()) return;
-        setUsername(content); // Set new username
+        //setUsername(content); // Set new username
         client.sendPayload({
           cmd: ClientCMD.CHANGE_USERNAME,
           data: { username: content },
-        }); // Send username change payload
-        setMessages((prev) => [
-          ...prev,
-          {
-            username: "system",
-            text: `Username changed to ${content}`,
-            time: current_time,
-          },
-        ]);
+        });
         break;
       case "/join":
         if (!check_content()) return;
-        setRoom(content); // Set new room
-        client.sendPayload({
-          cmd: ClientCMD.JOIN_ROOM,
-          data: { room: content },
-        }); // Send join room payload
-        setMessages((prev) => [
-          ...prev,
-          {
-            username: "system",
-            text: `Room changed to ${content}`,
-            time: current_time,
-          },
-        ]);
+
+        if (!chatInfos.find((info) => info.room === content)) {
+          client.sendPayload({
+            cmd: ClientCMD.JOIN_ROOM,
+            data: { room: content },
+          }); // Send join room payload
+        }
         break;
       case "/leave":
         client.sendPayload({
           cmd: ClientCMD.LEAVE_ROOM,
-          data: { room: room },
+          data: { room: selectedRoom },
         }); // Send join room payload
-        setRoom("local"); // Set new room
-        setMessage([]);
-        setMessages((prev) => [
-          ...prev,
-          {
-            username: "system",
-            text: `Left the room ${content}`,
+        break;
+      case "/switch":
+        if (chatInfos.some((chatInfo) => chatInfo.room === content)) {
+          setSelectedRoom(content); // Set new room
+        } else {
+          cacheMessageInRoom(selectedRoom, {
             time: current_time,
-          },
-        ]);
+            username: "system",
+            text: `You are not in room ${content}`,
+          });
+        }
+
         break;
       case "/clear":
-        setMessages([]); // Clear chat
+        setChatInfos((prev) =>
+          prev.map((info) =>
+            info.room === selectedRoom ? { ...info, messages: [] } : info,
+          ),
+        );
         break;
       default:
-        setMessages((prev) => [
-          ...prev,
-          {
-            username: "system",
-            text: `Unknown command '${command}'`,
-            time: current_time,
-          },
-        ]);
+        setChatInfos((prev) =>
+          prev.map((info) =>
+            info.room === selectedRoom
+              ? {
+                  ...info,
+                  messages: [
+                    ...info.messages,
+                    {
+                      username: "system",
+                      text: `Unknown command '${command}'`,
+                      time: getCurrentTimeUTC(),
+                    },
+                  ],
+                }
+              : info,
+          ),
+        );
         break;
     }
   };
@@ -170,15 +239,13 @@ export default function Input({ setMessages, setMembers }) {
         handleCommand(message);
         setMessage(""); // Clear input after sending
       } else {
-        const current_time = getCurrentTimeUTC();
+        const chatInfo = chatInfos.find((info) => info.room === selectedRoom);
+        const key = chatInfo ? chatInfo.key : null;
+        let encrypted_message = XOR(message, key);
         client.sendPayload({
           cmd: ClientCMD.MESSAGE,
-          data: { message, room, username },
-        }); // Send message payload to server
-        // setMessages((prev) => [
-        //   ...prev,
-        //   { username: username, text: message, time: current_time },
-        // ]);
+          data: { message: encrypted_message, room: selectedRoom, username },
+        });
         setMessage(""); // Clear input after sending
       }
     }
@@ -279,7 +346,7 @@ export default function Input({ setMessages, setMembers }) {
       <div className="flex mt-0 sm:mt-3 text-primary w-fit h-fit text-nowrap">
         <div>{username}</div>
         <div>@</div>
-        <div>{room}</div>
+        <div>{selectedRoom}</div>
         <div>:</div>
       </div>
       <div className="relative w-full">

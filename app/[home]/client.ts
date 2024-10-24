@@ -14,7 +14,7 @@ class WebSocketClient {
   private callback: ((payload: ServerPayload) => void) | null = null;
 
   constructor(url: string) {
-    console.log("Connecting to: ", url)
+    console.log("Connecting to: ", url);
     this.ws = new WebSocket(url);
 
     // Handle WebSocket open event
@@ -38,6 +38,7 @@ class WebSocketClient {
         const serverPayload: ServerPayload = JSON.parse(event.data);
 
         if (this.callback) {
+          console.log(serverPayload);
           this.callback(serverPayload);
         }
       } catch (error) {
@@ -47,7 +48,7 @@ class WebSocketClient {
             cmd: ServerCMD.ERROR,
             data: { message: "System error" },
           };
-          if (this.callback) this.callback(errorPayload);
+          this.callback(errorPayload);
         }
       }
     };
@@ -59,6 +60,7 @@ class WebSocketClient {
         cmd: ServerCMD.ERROR,
         data: { message: JSON.stringify(error) },
       };
+      console.log(errorPayload);
       // if (this.callback) this.callback(errorPayload);
     };
 
@@ -71,6 +73,7 @@ class WebSocketClient {
         data: { message: "Lost connection to system" },
       };
       if (this.callback) this.callback(payload);
+      console.log(payload);
     };
   }
 

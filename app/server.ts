@@ -20,7 +20,7 @@ Bun.serve({
   },
   websocket: {
     open(ws: WebSocketWithRoom) {
-      ws.room = null;
+      ws.rooms = [];
       ws.username = null;
       console.log("WebSocket connection opened");
     },
@@ -28,6 +28,8 @@ Bun.serve({
       let parsed_message: ClientPayload = {};
       try {
         parsed_message = JSON.parse(message);
+        console.log("Received:");
+        console.log(parsed_message);
       } catch (error) {
         console.error("Error parsing message:", error);
         if (error instanceof Error) {
@@ -53,10 +55,22 @@ Bun.serve({
           let old_username = ws.username;
           ws.username = newUsername;
 
-          broadcastInfo(
-            ws.room ?? "null",
-            `${old_username} is now known as ${ws.username}`,
-          );
+          const data: ServerData = { username: newUsername };
+          const payload: ServerPayload = {
+            cmd: ServerCMD.USERNAME_CHANGED,
+            data,
+          };
+
+          ws.send(JSON.stringify(payload));
+
+          for (const room of ws.rooms) {
+            broadCastMembersUpdate(room);
+            broadcastInfo(
+              room,
+              `${old_username} is now known as ${ws.username}`,
+            );
+          }
+
           break;
         }
 
@@ -66,7 +80,7 @@ Bun.serve({
             ws.username === "guest" ||
             ws.username === "system"
           ) {
-            sendError(ws, "Invalid username");
+            sendError(ws, "You need a custom username first");
             return;
           }
 
@@ -76,35 +90,69 @@ Bun.serve({
             return;
           }
 
-          if (ws.room) {
-            // Remove from old room
-            leaveRoom(ws);
-          }
+          if (!ws.rooms.includes(roomToJoin)) {
+            const data: ServerData = { room: roomToJoin };
+            const payload: ServerPayload = {
+              cmd: ServerCMD.ROOM_JOINED,
+              data,
+            };
 
-          ws.room = roomToJoin;
-          if (!rooms[ws.room]) {
-            rooms[ws.room] = [];
-          }
+            ws.send(JSON.stringify(payload));
 
-          rooms[ws.room].push(ws);
-          broadcastInfo(ws.room, `User ${ws.username} has joined the room`);
-          broadCastMembersUpdate(ws.room);
+            ws.rooms.push(roomToJoin);
+            if (!rooms[roomToJoin]) rooms[roomToJoin] = [];
+            rooms[roomToJoin].push(ws);
+
+            broadcastInfo(
+              roomToJoin,
+              `User ${ws.username} has joined the room`,
+            );
+            broadCastMembersUpdate(roomToJoin);
+          }
           break;
         }
 
         case ClientCMD.LEAVE_ROOM: {
-          if (!ws.room || !rooms[ws.room]) {
+          const roomToLeave = parsed_message.data?.room ?? "";
+          if (roomToLeave === "local" || roomToLeave.length < 1) {
+            sendError(ws, "Invalid room");
+            return;
+          }
+
+          if (
+            !ws.rooms ||
+            !ws.rooms.includes(roomToLeave) ||
+            !rooms[roomToLeave]
+          ) {
             sendError(ws, "You are not in a room");
             return;
           }
-          let temp = ws.room;
-          leaveRoom(ws);
-          broadCastMembersUpdate(temp);
+
+          const data: ServerData = { room: roomToLeave };
+          const payload: ServerPayload = {
+            cmd: ServerCMD.ROOM_LEFT,
+            data,
+          };
+
+          ws.send(JSON.stringify(payload));
+
+          broadCastMembersUpdate(roomToLeave);
+          leaveRoom(ws, roomToLeave);
           break;
         }
 
         case ClientCMD.MESSAGE: {
-          if (!ws.room || !rooms[ws.room]) {
+          const roomToMessage = parsed_message.data?.room ?? "";
+          if (roomToMessage === "local" || roomToMessage.length < 1) {
+            sendError(ws, "Invalid room");
+            return;
+          }
+
+          if (
+            !ws.rooms ||
+            !ws.rooms.includes(roomToMessage) ||
+            !rooms[roomToMessage]
+          ) {
             sendError(ws, "You are not in a room");
             return;
           }
@@ -115,7 +163,11 @@ Bun.serve({
             return;
           }
 
-          broadcastMessage(ws.room, ws.username ?? "unknown", userMessage);
+          broadcastMessage(
+            roomToMessage,
+            ws.username ?? "unknown",
+            userMessage,
+          );
           break;
         }
 
@@ -125,7 +177,7 @@ Bun.serve({
       }
     },
     close(ws: WebSocketWithRoom) {
-      leaveRoom(ws);
+      ws.rooms.forEach((room) => leaveRoom(ws, room));
       console.log("WebSocket connection closed");
     },
   },
@@ -139,7 +191,7 @@ function broadCastMembersUpdate(room: string) {
   for (let i = 0; i < clients.length; i++) {
     members.push(clients[i].username ?? "");
   }
-  const data: ServerData = { members };
+  const data: ServerData = { members, room };
   const payload: ServerPayload = { cmd: ServerCMD.MEMBERS, data };
 
   console.log(payload);
@@ -152,7 +204,7 @@ function broadCastMembersUpdate(room: string) {
 function broadcastMessage(room: string, username: string, message: string) {
   const clients = rooms[room] || [];
 
-  const data: ServerData = { username, message };
+  const data: ServerData = { username, message, room };
   const payload: ServerPayload = { cmd: ServerCMD.MESSAGE, data };
 
   clients.forEach((client) => {
@@ -165,7 +217,7 @@ function broadcastInfo(room: string, message: string) {
   console.log("Broadcasting: ", message);
   console.log("to : ", clients.length);
 
-  const data: ServerData = { username: undefined, message };
+  const data: ServerData = { username: undefined, message, room };
   const payload: ServerPayload = { cmd: ServerCMD.INFO, data };
 
   clients.forEach((client) => {
@@ -180,16 +232,11 @@ function sendError(ws: WebSocketWithRoom, message: string) {
   ws.send(JSON.stringify(payload));
 }
 
-function leaveRoom(ws: WebSocketWithRoom) {
-  if (!ws.room || !rooms[ws.room]) return;
-
-  broadcastInfo(ws.room, `User ${ws.username} has left the room`);
-
-  rooms[ws.room] = rooms[ws.room].filter((client) => client !== ws);
-
-  if (rooms[ws.room].length === 0) {
-    delete rooms[ws.room];
-  }
-
-  ws.room = null;
+function leaveRoom(ws: WebSocketWithRoom, room: string) {
+  if (!rooms[room]) return;
+  rooms[room] = rooms[room].filter((client) => client !== ws);
+  ws.rooms = ws.rooms.filter((r) => r !== room);
+  if (rooms[room].length === 0) delete rooms[room];
+  broadcastInfo(room, `User ${ws.username} left the room`);
+  broadCastMembersUpdate(room);
 }

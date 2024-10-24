@@ -14,3 +14,23 @@ export function getCurrentTimeUTC() {
 
   return `${day}/${month}/${year} @ ${hours}:${minutes} UTC`;
 }
+
+export function XOR(message, key) {
+  console.log("called xor with:");
+  console.log(message);
+  console.log(key);
+
+  if (!key) return message;
+
+  let result = "";
+  for (let i = 0; i < message.length; i++) {
+    // XOR each character of the message with the key, cycling through the key
+    result += String.fromCharCode(
+      message.charCodeAt(i) ^ key.charCodeAt(i % key.length),
+    );
+  }
+  console.log("result xor with:");
+  console.log(result);
+
+  return result;
+}
