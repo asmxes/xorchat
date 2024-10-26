@@ -1,44 +1,48 @@
+
 <div align="center">
   <a href="xor.chat">
     <img src="https://github-readme-tech-stack.vercel.app/api/cards?title=Tech+Stack&align=center&titleAlign=center&lineCount=1&theme=discord&hideTitle=true&bg=%23202226&badge=%232f3137&border=%232f3137&titleColor=%235865f2&line1=react%2Creact%2C45ceff%3Bnext.js%2Cnext.js%2Cffffff%3Btailwindcss%2Ctailwindcss%2Ca4f8ff%3Bbun%2Cbun%2Cffffff%3B" alt=" " />
   </a>
 </div>
 
-# 🌐 xor.chat | WebSocket Live Chat
+---
 
-Welcome to the **xor.chat**! This repository demonstrates a lightweight, high-performance live chat using Bun's `bun.serve`.
+# 🌐 xor.chat
+
+Welcome to the **xor.chat**! This repository demonstrates a lightweight, high-performance, privacy-focused live chat using Bun's `bun.serve`.
 
 ## ⚡ Key Features
 
 - **Real-Time WebSocket Connections**: Connect, broadcast, and receive real-time data.
 - **Fast & Lightweight**: Only the necessary, see what rooms you joined and how many people are connected, encrypt your messages with a key.
-- **Customizable & Scalable**: Modify host and port for easy deployment and scaling.
+- **Server-less**: No data is saved anywhere, rooms are created when used and destroyed when empty, messages are broadcasted to connected clients without saving anything on disk. If you want to clear the chat, simply `/clear` or refresh the page.
+- **Customizable & Scalable**: Start the server, run the UI and you are ready to chat.
+
 
 ## 📋 Requirements
 
 - **[Bun](https://bun.sh/)** (For the WebSocket)
-- **[Bun](https://bun.sh/)/[Node](https://nodejs.org/)/[Deno](https://deno.com/)** (for for the Next.js client)
+- **[Bun](https://bun.sh/)/[Node](https://nodejs.org/)/[Deno](https://deno.com/)** (for for the Next.js UI client)
 
 ## 🚀 Getting Started
 
 ### 1. Clone the Repository
 
-```bash
+```sh
 git clone https://github.com/asmxes/xorchat
-cd websocket-server-bun
+cd xorchat
 ```
 
 ### 2. Install Dependencies
 
-Since Bun is our primary runtime, installation is as easy as:
 
-```bash
+```sh
 bun/node/deno install
 ```
 
 ### 3. Configuration
 
-Edit the host and port settings in `index.js` to suit your environment.
+Edit the host and port settings in `app/server.ts` to suit your environment.
 
 ```javascript
 bun.serve({
@@ -48,15 +52,33 @@ bun.serve({
 });
 ```
 
+Then:
+
+```sh
+touch .env.local & nano .env.local
+```
+
+Finally make sure you define the `NEXT_PUBLIC_WS_URL` variable like this:
+
+```
+NEXT_PUBLIC_WS_URL=ws://{yourhostname}:{yourport}
+```
+
 ### 4. Run the Server
 
 Start the WebSocket server with Bun:
 
-```bash
+```sh
 bun/node/deno run ./app/server.ts
 ```
 
-Your WebSocket server will now be live on the configured `hostname` and `port` (e.g., `ws://localhost:3001`).
+### 4. Run the Client
+
+```sh
+bun/node/deno run dev
+```
+
+That's it!
 
 ## 📡 Usage
 
@@ -75,8 +97,8 @@ This project is licensed under the MIT License.
 
 ---
 
-Feel free to fork this repository, contribute, and give it a ⭐️ if you find it useful!
+Feel free to fork this repository and contribute (there's still alot of QOL features to add), and give it a ⭐️ if you find it useful!
 
 ## ✨ Credits
 
-Created with 💖 by [Your Name](https://github.com/yourusername)
+Created with 💖 by [asm](https://github.com/asmxes)
