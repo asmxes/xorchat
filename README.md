@@ -1,3 +1,8 @@
+<div align="center">
+  <a href="xor.chat">
+    <img src="https://github-readme-tech-stack.vercel.app/api/cards?title=Tech+Stack&align=center&titleAlign=center&lineCount=1&theme=discord&hideTitle=true&bg=%23202226&badge=%232f3137&border=%232f3137&titleColor=%235865f2&line1=react%2Creact%2C45ceff%3Bnext.js%2Cnext.js%2Cffffff%3Btailwindcss%2Ctailwindcss%2Ca4f8ff%3Bbun%2Cbun%2Cffffff%3B" alt=" " />
+  </a>
+</div>
 
 # 🌐 xor.chat | WebSocket Live Chat
 
