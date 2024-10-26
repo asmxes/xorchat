@@ -52,10 +52,10 @@ function Message({ key, msg, decryption_key }) {
     <div
       key={key}
       className={`flex ${system_message ? "justify-center py-1" : "justify-start"} space-x-1 mt-0.5
-         animate-blurIn`}
+         animate-blurIn bg-transparent`}
     >
       {!system_message && (
-        <div className="flex">
+        <div className="flex bg-transparent">
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
@@ -92,8 +92,8 @@ export default function Content({ messages, decryption_key, selectedRoom }) {
   }, [messages]);
 
   return (
-    <div className=" flex flex-col justify-end h-full sm:h-96 overflow-auto min-h-40 resize-y">
-      <div className="overflow-auto">
+    <div className=" flex flex-col justify-end h-full sm:h-96 overflow-auto min-h-40 resize-y bg-transparent">
+      <div className="overflow-auto bg-transparent">
         {selectedRoom === "local" ? <QA /> : null}
         {messages.map((msg, index) => (
           <Message key={index} msg={msg} decryption_key={decryption_key} />

@@ -11,6 +11,7 @@ import {
 const rooms: { [key: string]: WebSocketWithRoom[] } = {};
 
 Bun.serve({
+  hostname: "0.0.0.0",
   port: 3001,
   fetch(req, server) {
     if (server.upgrade(req)) {

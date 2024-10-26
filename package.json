@@ -3,9 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "concurrently \"bun run app/server.ts\" \"bun run next dev\"",
+    "dev": "next dev",
     "build": "next build",
-    "start": "concurrently \"bun run app/server.ts\" \"bun run next start\"",
+    "start": "next start",
     "lint": "next lint"
   },
   "dependencies": {
