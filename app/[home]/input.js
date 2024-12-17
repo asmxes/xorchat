@@ -27,8 +27,8 @@ export default function Input({
   const selectedRoomRef = useRef(selectedRoom);
 
   const playSound = () => {
-    console.log("playing sound")
-    const audio = new Audio('../audios/fart.mp3'); // Use a relative path or URL to the sound file
+    console.log("playing sound");
+    const audio = new Audio("../audios/fart.mp3"); // Use a relative path or URL to the sound file
     audio.play();
   };
 
@@ -96,13 +96,12 @@ export default function Input({
           time: current_time,
         });
 
-        console.log("messageissss:")
-        console.log(payload.data.message)
-        console.log("usernameis:")
-        console.log(`@${username}`)
-        
-        if(payload.data.message.includes(`@guest`))
-          playSound()
+        console.log("messageissss:");
+        console.log(payload.data.message);
+        console.log("usernameis:");
+        console.log(`@${username}`);
+
+        if (payload.data.message.includes(`@guest`)) playSound();
 
         break;
 
@@ -255,17 +254,15 @@ export default function Input({
         handleCommand(message);
         setMessage(""); // Clear input after sending
       } else {
-        if (message === "cls")
-        {
+        if (message === "cls") {
           setChatInfos((prev) =>
             prev.map((info) =>
               info.room === selectedRoom ? { ...info, messages: [] } : info,
             ),
           );
           setMessage(""); // Clear input after sending
-          return
+          return;
         }
-
 
         const chatInfo = chatInfos.find((info) => info.room === selectedRoom);
         const key = chatInfo ? chatInfo.key : null;
@@ -370,7 +367,7 @@ export default function Input({
   }
 
   return (
-    <div className="w-full flex flex-col sm:flex-row flex-grow mt-4">
+    <div className="w-full flex flex-col sm:flex-row flex-grow mt-4 mb-10">
       <div className="flex mt-3 sm:mt-[10px] text-primary w-fit h-fit text-nowrap">
         <div>{username}</div>
         <div>@</div>
