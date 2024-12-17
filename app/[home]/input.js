@@ -367,7 +367,7 @@ export default function Input({
   }
 
   return (
-    <div className="w-full flex flex-col sm:flex-row flex-grow mt-4 mb-10">
+    <div className="w-full flex flex-col sm:flex-row flex-grow mt-4 mb-8">
       <div className="flex mt-3 sm:mt-[10px] text-primary w-fit h-fit text-nowrap">
         <div>{username}</div>
         <div>@</div>
