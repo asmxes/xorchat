@@ -11,9 +11,7 @@ export const metadata = {
   title: "聊天",
   description: "With friends :)",
   icons: {
-    apple: [
-      { url: "/apple-touch-icon-180x180.png", sizes: "180x180" }
-    ],
+    apple: [{ url: "/icons/apple-touch-icon.png", sizes: "180x180" }],
   },
   other: {
     "apple-mobile-web-app-capable": "yes",
