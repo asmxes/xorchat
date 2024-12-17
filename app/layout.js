@@ -10,6 +10,15 @@ const geistMono = localFont({
 export const metadata = {
   title: "聊天",
   description: "With friends :)",
+  icons: {
+    apple: [
+      { url: "/apple-touch-icon-180x180.png", sizes: "180x180" }
+    ],
+  },
+  other: {
+    "apple-mobile-web-app-capable": "yes",
+    "apple-mobile-web-app-status-bar-style": "black-translucent",
+  },
 };
 
 export default function RootLayout({ children }) {
