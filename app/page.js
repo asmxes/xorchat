@@ -7,6 +7,7 @@ import Members from "./[home]/members";
 import Rooms from "./[home]/rooms";
 
 import { MessageData, ChatInfo } from "./[home]/types";
+import { TooltipProvider, Tooltip } from "@radix-ui/react-tooltip";
 
 export default function Home() {
   const [chatInfos, setChatInfos] = useState([
@@ -21,6 +22,7 @@ export default function Home() {
 
   return (
     <div className="flex flex-row justify-center w-full ">
+      <TooltipProvider>
       <Rooms
         chatInfos={chatInfos}
         setChatInfos={setChatInfos}
@@ -28,7 +30,7 @@ export default function Home() {
         setSelectedRoom={setSelectedRoom}
       />
 
-      <div className=" flex flex-col min-h-dvh max-h-dvh w-full px-4 sm:px-0 sm:w-3/4 lg:w-4/6 xl:w-5/12 py-4 ">
+      <div className="flex flex-col min-h-dvh max-h-dvh w-full px-4 sm:px-0 sm:w-3/4 lg:w-4/6 xl:w-5/12 py-4 ">
         <div className="w-full items-center flex flex-col justify-center text-primary font-bold pb-4">
           x.c
         </div>
@@ -48,11 +50,13 @@ export default function Home() {
           setSelectedRoom={setSelectedRoom}
         />
       </div>
+
       <Members
         members={
           chatInfos.find((info) => info.room === selectedRoom)?.members || []
         }
       />
+      </TooltipProvider>
     </div>
   );
 }

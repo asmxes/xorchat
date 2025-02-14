@@ -280,7 +280,16 @@ export default function Input({
     const value = e.target.value;
     setMessage(value);
 
-    if (value.startsWith("/")) {
+    if(value.startsWith("@")) {
+      setShowCommands(true);
+      const searchTerm = value.slice(1).toLowerCase();
+      const membs = chatInfos.find((info) => info.room === selectedRoom)?.members || []
+      setFilteredCommands(
+        membs.filter((username) => username.toLowerCase().includes(searchTerm)),
+      );
+      console.log(membs)
+    } 
+    else if (value.startsWith("/")) {
       setShowCommands(true);
 
       const searchTerm = value.slice(1).toLowerCase();
@@ -293,7 +302,7 @@ export default function Input({
   };
 
   const handleCommandSelect = (commandName) => {
-    setMessage(`/${commandName} `);
+    setMessage(`${message.startsWith('/') ? "/" : "@"}${commandName} `);
     setShowCommands(false);
     inputRef.current.focus();
   };
@@ -358,7 +367,7 @@ export default function Input({
               hover:text-bg hover:bg-primary"
               onClick={() => handleCommandSelect(cmd)}
             >
-              /{cmd}
+              {cmd}
             </div>
           ))}
         </div>
