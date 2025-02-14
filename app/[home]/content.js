@@ -46,8 +46,9 @@ function QA() {
   );
 }
 
-function Message({ key, msg, decryption_key }) {
+function Message({ username, key, msg, decryption_key }) {
   let system_message = msg.username === "system";
+  const actual_text = msg.text;
   return (
     <div
       key={key}
@@ -73,7 +74,7 @@ function Message({ key, msg, decryption_key }) {
       )}
 
       <div
-        className={`${msg.username === "system" ? "text-neutral-600" : "text-neutral-400"}`}
+        className={`${msg.username === "system" ? "text-neutral-600" : (actual_text.includes(`@${username} `) || actual_text.endsWith(`@${username}`)) ? "text-primary" : "text-neutral-400"}`}
       >
         {msg.username === "system" ? msg.text : XOR(msg.text, decryption_key)}
       </div>
@@ -81,7 +82,7 @@ function Message({ key, msg, decryption_key }) {
   );
 }
 
-export default function Content({ messages, decryption_key, selectedRoom }) {
+export default function Content({ username, messages, decryption_key, selectedRoom }) {
   const bottomRef = useRef(null); // Reference for the bottom of the message list
 
   useEffect(() => {
@@ -96,7 +97,7 @@ export default function Content({ messages, decryption_key, selectedRoom }) {
       <div className="overflow-auto bg-transparent overflow-visible	">
         {selectedRoom === "local" ? <QA /> : null}
         {messages.map((msg, index) => (
-          <Message key={index} msg={msg} decryption_key={decryption_key} />
+            <Message username={username} key={index} msg={msg} decryption_key={decryption_key} />
         ))}
         {/* Dummy div at the bottom to scroll into view */}
         <div ref={bottomRef} />

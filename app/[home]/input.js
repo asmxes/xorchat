@@ -7,12 +7,17 @@ import { ServerCMD, ClientCMD, ClientPayload } from "../types"; // Import the ty
 const commands = ["username", "key", "clear", "join", "leave", "switch"];
 
 export default function Input({
+  username,
+  setUsername,
   chatInfos,
   setChatInfos,
   selectedRoom,
   setSelectedRoom,
 }) {
-  const [username, setUsername] = useState("guest");
+
+  const usernameRef = useRef(username);
+  const chatInfosRef = useRef(chatInfos)
+  
   const [message, setMessage] = useState("");
 
   const [showCommands, setShowCommands] = useState(false);
@@ -27,8 +32,8 @@ export default function Input({
   const selectedRoomRef = useRef(selectedRoom);
 
   const playSound = () => {
-    console.log("playing sound");
-    const audio = new Audio("../audios/fart.mp3"); // Use a relative path or URL to the sound file
+    const audio = new Audio("/notif.mp3"); // Use a relative path or URL to the sound file
+    audio.volume = 0.7;
     audio.play();
   };
 
@@ -36,6 +41,14 @@ export default function Input({
   useEffect(() => {
     selectedRoomRef.current = selectedRoom;
   }, [selectedRoom]);
+
+  useEffect(() => {
+    usernameRef.current = username;
+  }, [username])
+
+  useEffect(() => {
+    chatInfosRef.current = chatInfos;
+  }, [chatInfos])
 
   const cacheMessageInRoom = (room, message) => {
     // Use the ref's current value
@@ -96,12 +109,15 @@ export default function Input({
           time: current_time,
         });
 
-        console.log("messageissss:");
-        console.log(payload.data.message);
-        console.log("usernameis:");
-        console.log(`@${username}`);
-
-        if (payload.data.message.includes(`@guest`)) playSound();
+        if(payload.data.username != usernameRef.current){
+          const currentRoomInfo = chatInfosRef.current.find(obj => obj.room == selectedRoomRef.current)
+          if(currentRoomInfo.members.length == 2){
+            playSound();
+          }
+          else if (payload.data.message.includes(`@${usernameRef.current} `) || payload.data.message.endsWith(`@${usernameRef.current}`)){ 
+            playSound();
+          }
+        }
 
         break;
 
@@ -287,7 +303,6 @@ export default function Input({
       setFilteredCommands(
         membs.filter((username) => username.toLowerCase().includes(searchTerm)),
       );
-      console.log(membs)
     } 
     else if (value.startsWith("/")) {
       setShowCommands(true);

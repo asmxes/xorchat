@@ -10,6 +10,7 @@ import { MessageData, ChatInfo } from "./[home]/types";
 import { TooltipProvider, Tooltip } from "@radix-ui/react-tooltip";
 
 export default function Home() {
+  const [username, setUsername] = useState("guest");
   const [chatInfos, setChatInfos] = useState([
     {
       room: "local",
@@ -35,6 +36,7 @@ export default function Home() {
           x.c
         </div>
         <Content
+          username={username}
           messages={
             chatInfos.find((info) => info.room === selectedRoom)?.messages || []
           }
@@ -44,6 +46,8 @@ export default function Home() {
           selectedRoom={selectedRoom}
         />
         <Input
+          username={username}
+          setUsername={setUsername}
           chatInfos={chatInfos}
           setChatInfos={setChatInfos}
           selectedRoom={selectedRoom}

@@ -16,9 +16,6 @@ export function getCurrentTimeUTC() {
 }
 
 export function XOR(message, key) {
-  console.log("called xor with:");
-  console.log(message);
-  console.log(key);
 
   if (!key) return message;
 
@@ -29,8 +26,6 @@ export function XOR(message, key) {
       message.charCodeAt(i) ^ key.charCodeAt(i % key.length),
     );
   }
-  console.log("result xor with:");
-  console.log(result);
 
   return result;
 }
